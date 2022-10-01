@@ -11,13 +11,15 @@ size_of_test_cut = 0.5 # how big of a square to cut out for each power/speed com
 top_margin = 1
 left_margin = 1
 gap_between_cuts = 0.25
+
+ppi = 96
 svg_size = (left_margin + len(powers) * (size_of_test_cut + gap_between_cuts),
             top_margin +  len(speeds) * (size_of_test_cut + gap_between_cuts)) # (length, width) in the units specified above that will be used as the size attribute of the SVG file.
 engrave_color = "blue"
 score_color = "green"
 cut_color = 0xFF0000
 
-viewbox_x, viewbox_y = svg_size[0] * 100, svg_size[1] * 100 #viewbox coordinates are in 100ths of an inch
+viewbox_x, viewbox_y = svg_size[0] * ppi, svg_size[1] * ppi #viewbox coordinates are in 100ths of an inch
 
 def text_to_polylines(text, x_offset, y_offset, height=10):
     thefont = HersheyFonts()

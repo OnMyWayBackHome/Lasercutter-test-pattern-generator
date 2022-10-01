@@ -16,7 +16,22 @@ thefont.render_options.scalex = scale_factor
 thefont.render_options.yofs = 50 #thefont.render_options['bottom_line'] * scale_factor
 thefont.render_options.xofs = 20
 
-for (x1, y1), (x2, y2) in thefont.lines_for_text('Hello'):
-    dwg.add(dwg.line((x1, y1), (x2 ,y2), stroke='blue', fill='none'))
+polylines = []
+first_point = True
+for (x1, y1), (x2, y2) in thefont.lines_for_text('Power'):
+    if first_point:
+        polyline = [(x1, y1), (x2, y2)]
+        prev_x2, prev_y2 = (x2, y2)
+        first_point = False
+    elif (x1, y1) == (prev_x2, prev_y2):
+        polyline.append((x2, y2))
+        prev_x2, prev_y2 = (x2, y2)
+    else:
+        polylines.append(polyline)
+        polyline = [(x1, y1), (x2, y2)]  # start a new polyine
+        prev_x2, prev_y2 = (x2, y2)
+polylines.append(polyline)  
+for polyline in polylines:
+    dwg.add(dwg.polyline(polyline, stroke='blue', fill='none'))        
 
 dwg.save()

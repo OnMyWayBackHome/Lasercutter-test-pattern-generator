@@ -1,11 +1,32 @@
 from HersheyFonts import HersheyFonts
 import svgwrite
 
-material = 'Acrylic 1/8"'  # The title that is written on your test cut. Make this short enough to fit in your SVG file. This program doesn't check the length.
-notes1 = "estreet plastics" # second line of title (in smaller font)
-notes2 = "focus height: 0.21" # third line 
-powers = [-1] # list the power settings to test (-1 = Full power)
-speeds = [130, 150, 170, 190]  # list the speeds to test
+materials = [
+    {"filename" : "test_cut_acrylic_estreet",
+    "header" : ['Acrylic 1/8"', "estreet plastics", "focus: 0.115in"], # title and two additional lines. Make these short enough to fit. This program doesn't check length
+    "powers" : [-1], # list the power settings to test separated by commas (-1 = Full power)
+    "speeds" : [130, 150, 170, 190],},  # list the speeds to test
+    {"filename" : "test_cut_acrylic_optyx",
+    "header" : ['Acrylic 1/8"', "optyx", "focus: 0.105in"], 
+    "powers" : [-1], 
+    "speeds" : [150, 170, 190, 200],},
+    {"filename" : "test_cut_plywood_woodpecker",
+    "header" : ['Plywood 1/8"', "woodpecker", "focus: 0.125in"], 
+    "powers" : [-1], 
+    "speeds" : [130, 150, 170, 190],},
+    {"filename" : "test_cut_mylar_aooin",
+    "header" : ['Mylar 4mil"', "Aooin", "0.01 w/card stock"], 
+    "powers" : [40, 60, 80], 
+    "speeds" : [500, 550, 600, 650],}, 
+    {"filename" : "test_cut_foam_core",
+    "header" : ['Foam Core"', "??", "focus 0.25"], 
+    "powers" : [60, 80, 100], 
+    "speeds" : [200, 250, 300, 350],}, 
+    {"filename" : "test_cut_felt",
+    "header" : ['Felt"', "VieFantaisie", "focus 0.04"], 
+    "powers" : [60, 80, 100], 
+    "speeds" : [200, 250, 300, 350],}, 
+]
 
 
 units="in"  # enter the values below using these units. Valid SVG units are in, cm, mm, pt, px
@@ -56,12 +77,12 @@ def hex_color_code(n):
     return f'#{n:06X}'
 
 
-dwg = svgwrite.drawing.Drawing("tmp.svg", 
+dwg = svgwrite.drawing.Drawing(f"{filename}.svg", 
     size=(f'{svg_size[0]}{units}', f'{svg_size[1]}{units}'),
     viewBox=f"0 0 {viewbox_x} {viewbox_y}", 
     profile='full')
 
-# convert to user coordinates of (approximate) pixels
+# convert to user coordinates of (approximate) pixels by 
 left_margin *= ppu
 top_margin *= ppu
 gap_between_cuts *= ppu
@@ -72,16 +93,16 @@ size_of_test_cut *= ppu
 y = text_height + line_spacing
 for polyline in text_to_polylines(material, gap_between_cuts, y, text_height):
     dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
-y = y + text_height + line_spacing
+y += text_height + line_spacing
 for polyline in text_to_polylines(notes1, gap_between_cuts, y, text_height * smaller_text_factor):
     dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
-y = y + text_height + line_spacing * smaller_text_factor
+y += text_height + line_spacing * smaller_text_factor
 for polyline in text_to_polylines(notes2, gap_between_cuts, y, text_height * smaller_text_factor):
     dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
-y = y + text_height + line_spacing * smaller_text_factor
+y += text_height + line_spacing * smaller_text_factor
 for polyline in text_to_polylines("Power", left_margin, y, text_height):
     dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))    
-y = y + text_height + line_spacing
+y += text_height + line_spacing
 for i, power in enumerate(powers):
     if power == -1:
         label = "Full" 

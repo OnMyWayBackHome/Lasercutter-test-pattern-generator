@@ -3,29 +3,33 @@ import svgwrite
 
 materials = [
     {"filename" : "test_cut_acrylic_estreet",
-    "header" : ['Acrylic 1/8"', "estreet plastics", "focus: 0.115in"], # title and two additional lines. Make these short enough to fit. This program doesn't check length
+    "header" : ['Acrylic 1/8"', "estreet plastics", "thick: 0.115in"], # title and two additional lines. Make these short enough to fit. This program doesn't check length
     "powers" : [-1], # list the power settings to test separated by commas (-1 = Full power)
     "speeds" : [130, 150, 170, 190],},  # list the speeds to test
     {"filename" : "test_cut_acrylic_optyx",
-    "header" : ['Acrylic 1/8"', "optyx", "focus: 0.105in"], 
+    "header" : ['Acrylic 1/8"', "optyx", "thick: 0.105in"], 
     "powers" : [-1], 
     "speeds" : [150, 170, 190, 200],},
     {"filename" : "test_cut_plywood_woodpecker",
-    "header" : ['Plywood 1/8"', "woodpecker", "focus: 0.125in"], 
+    "header" : ['Plywood 1/8"', "woodpecker", "thick: 0.125in"], 
     "powers" : [-1], 
     "speeds" : [130, 150, 170, 190],},
     {"filename" : "test_cut_mylar_aooin",
-    "header" : ['Mylar 4mil"', "Aooin", "0.01 w/card stock"], 
-    "powers" : [40, 60, 80], 
-    "speeds" : [500, 550, 600, 650],}, 
+    "header" : ['Mylar 4mil', "Aooin", "0.01 w/card stock"], 
+    "powers" : [5, 15, 25], 
+    "speeds" : [200, 225, 250, 275],}, 
     {"filename" : "test_cut_foam_core",
-    "header" : ['Foam Core"', "??", "focus 0.25"], 
+    "header" : ['Foam Core', "--", "thickness 0.25"], 
     "powers" : [60, 80, 100], 
     "speeds" : [200, 250, 300, 350],}, 
+    {"filename" : "test_cut_cardboard",
+    "header" : ['Cardboard', "--", "thickness 0.125"], 
+    "powers" : [80, 100, -1], 
+    "speeds" : [200, 250, 300],}, 
     {"filename" : "test_cut_felt",
-    "header" : ['Felt"', "VieFantaisie", "focus 0.04"], 
-    "powers" : [60, 80, 100], 
-    "speeds" : [200, 250, 300, 350],}, 
+    "header" : ['Felt', "VieFantaisie", "thickness 0.04"], 
+    "powers" : [30, 45, 60], 
+    "speeds" : [200, 250, 300],}, 
 ]
 
 
@@ -42,10 +46,13 @@ score_color = "green"
 smaller_text_factor = 0.8 # scale down the smaller text by this factor.
 cut_color = 0xFF0000 #the first test cut will be red and the rest will add more and more blue.
 
-svg_size = (left_margin + len(powers) * (size_of_test_cut + gap_between_cuts),
-            top_margin +  len(speeds) * (size_of_test_cut + gap_between_cuts)) # (length, width) in the units specified above that will be used as the size attribute of the SVG file.
-
-viewbox_x, viewbox_y = svg_size[0] * ppu, svg_size[1] * ppu #viewbox coordinates as (approximate) pixels
+# convert to user coordinates of (approximate) pixels by 
+left_margin *= ppu
+top_margin *= ppu
+gap_between_cuts *= ppu
+line_spacing *= ppu
+text_height *= ppu
+size_of_test_cut *= ppu
 
 def text_to_polylines(text, x_offset, y_offset, height=10):
     thefont = HersheyFonts()
@@ -77,54 +84,53 @@ def hex_color_code(n):
     return f'#{n:06X}'
 
 
-dwg = svgwrite.drawing.Drawing(f"{filename}.svg", 
-    size=(f'{svg_size[0]}{units}', f'{svg_size[1]}{units}'),
-    viewBox=f"0 0 {viewbox_x} {viewbox_y}", 
-    profile='full')
+for material in materials:
+    svg_size = (left_margin + len(material["powers"]) * (size_of_test_cut + gap_between_cuts),
+                top_margin +  len(material["speeds"]) * (size_of_test_cut + gap_between_cuts) ) # (length, width) in pixels.
 
-# convert to user coordinates of (approximate) pixels by 
-left_margin *= ppu
-top_margin *= ppu
-gap_between_cuts *= ppu
-line_spacing *= ppu
-text_height *= ppu
-size_of_test_cut *= ppu
+    viewbox_x, viewbox_y = svg_size[0], svg_size[1] #viewbox coordinates as (approximate) pixels
 
-y = text_height + line_spacing
-for polyline in text_to_polylines(material, gap_between_cuts, y, text_height):
-    dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
-y += text_height + line_spacing
-for polyline in text_to_polylines(notes1, gap_between_cuts, y, text_height * smaller_text_factor):
-    dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
-y += text_height + line_spacing * smaller_text_factor
-for polyline in text_to_polylines(notes2, gap_between_cuts, y, text_height * smaller_text_factor):
-    dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
-y += text_height + line_spacing * smaller_text_factor
-for polyline in text_to_polylines("Power", left_margin, y, text_height):
-    dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))    
-y += text_height + line_spacing
-for i, power in enumerate(powers):
-    if power == -1:
-        label = "Full" 
-    else:
-        label = str(power)
-    for polyline in text_to_polylines(label, left_margin + i * (size_of_test_cut + gap_between_cuts), y, text_height):
-      dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
-
-for polyline in text_to_polylines("Speed", gap_between_cuts, top_margin, text_height):
-      dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
-for i, speed in enumerate(speeds):
-    for polyline in text_to_polylines(str(speed), gap_between_cuts, top_margin + text_height + line_spacing + i * (size_of_test_cut + gap_between_cuts), text_height):
-      dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
+    
+    dwg = svgwrite.drawing.Drawing(f'{material["filename"]}.svg', 
+        size=(f'{svg_size[0] / ppu }{units}', f'{svg_size[1] / ppu}{units}'), # size is in real-world units
+        viewBox=f"0 0 {viewbox_x} {viewbox_y}", 
+        profile='full')
 
 
-for i in range(len(speeds)):
-    for j in range(len(powers)):
-        top_left = (left_margin + j*(size_of_test_cut + gap_between_cuts),
-                    top_margin + i*(size_of_test_cut + gap_between_cuts))
-        dwg.add(dwg.rect(top_left, (size_of_test_cut, size_of_test_cut), stroke=hex_color_code(cut_color), fill='none'))        
-        cut_color += 16
-dwg.add(dwg.rect((0,0), (viewbox_x, viewbox_y), stroke=hex_color_code(cut_color), fill='none'))
-dwg.save()
+
+    y = text_height + line_spacing
+    for polyline in text_to_polylines(material["header"][0], gap_between_cuts, y, text_height):
+        dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
+    y += text_height + line_spacing
+    for line in material['header'][1:]:
+        for polyline in text_to_polylines(line, gap_between_cuts, y, text_height * smaller_text_factor):
+            dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
+        y += text_height + line_spacing * smaller_text_factor
+    for polyline in text_to_polylines("Power", left_margin, y, text_height):
+        dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))    
+    y += text_height + line_spacing
+    for i, power in enumerate(material["powers"]):
+        if power == -1:
+            label = "Full" 
+        else:
+            label = str(power)
+        for polyline in text_to_polylines(label, left_margin + i * (size_of_test_cut + gap_between_cuts), y, text_height):
+            dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
+
+    for polyline in text_to_polylines("Speed", gap_between_cuts, top_margin, text_height):
+        dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
+    for i, speed in enumerate(material["speeds"]):
+        for polyline in text_to_polylines(str(speed), gap_between_cuts, top_margin + text_height + line_spacing + i * (size_of_test_cut + gap_between_cuts), text_height):
+            dwg.add(dwg.polyline(polyline, stroke=score_color, fill='none'))
+
+
+    for i in range(len(material["speeds"])):
+        for j in range(len(material["powers"])):
+            top_left = (left_margin + j*(size_of_test_cut + gap_between_cuts),
+                        top_margin + i*(size_of_test_cut + gap_between_cuts))
+            dwg.add(dwg.rect(top_left, (size_of_test_cut, size_of_test_cut), stroke=hex_color_code(cut_color), fill='none'))        
+            cut_color += 16
+    dwg.add(dwg.rect((0,0), (viewbox_x, viewbox_y), stroke=hex_color_code(cut_color), fill='none'))
+    dwg.save()
 
 

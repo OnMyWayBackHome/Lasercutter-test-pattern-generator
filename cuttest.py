@@ -1,4 +1,4 @@
-# Program to create test files to import into Glowforge to test cut setting of new materials
+# Program to create test files to import into Glowforge to test cut power and speed settings for new materials
 # You can give it header text to score. Scoring is quicker than engraving.
 # Specify the speeds and power settings that you want to test and this will create a matrix of squares 
 # in individual colors so you can add the speed/power setting to each square. Create as many or as few items to test.

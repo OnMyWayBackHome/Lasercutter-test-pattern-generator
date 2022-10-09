@@ -5,10 +5,11 @@
 from HersheyFonts import HersheyFonts
 import svgwrite
 
+# Edit this list of materials to include the ones you are interested in testing. 
 materials = [
     {"filename" : "test_cut_acrylic_estreet",
     "header" : ['Acrylic 1/8 Red', "estreet plastics", "thick: 0.115in"], # title plus two lines of text to print at the top. Make these short enough to fit. This program doesn't check length
-    "powers" : [-1], # list the power settings to test separated by commas (-1 = Full power)
+    "powers" : [-1,], # list the power settings to test separated by commas (-1 = Full power)
     "speeds" : [190, 210, 230, 250],},  # list the speeds to test. This will make a square matrix with powers across the top and speeds going down.
     {"filename" : "test_cut_acrylic_optyx",
     "header" : ['Acrylic 1/8"', "optyx", "thick: 0.105in"], 
@@ -19,7 +20,7 @@ materials = [
     "powers" : [-1], 
     "speeds" : [200, 225, 250, 300],},
     {"filename" : "test_cut_mylar_4mil",
-    "header" : ['Mylar 4mil', "Aooin", "thick: 0.01 w/card stock"], 
+    "header" : ['Mylar Stencil 4mil', "Aooiin", "thickness 0.01\" w/card stock"], 
     "powers" : [5, 15, 25], 
     "speeds" : [200, 225, 250, 275],}, 
     {"filename" : "test_cut_mylar_6mil",
@@ -40,21 +41,21 @@ materials = [
     "speeds" : [300, 400, 500],}, 
 ]
 
-filename_version_number = "_v2"  #append this to the file name to distinguish versions. This can be blank "" if you don't need it.
+# You can edit these variable to change the sizes and colors of different elements.
+filename_version_number = "_v1"  # append this to the file name to distinguish versions. This can be blank "" if you don't need it.
 units="in"  # enter the values below using these units. Valid SVG units are in, cm, mm, pt, px
-size_of_test_cut = 0.5 # how big of a square to cut out for each power/speed combo (in "units" )
+ppu = 96 # pixels per unit. Used to make user coordinates in pixels. 96 Pixels per inch. 37.8 for pixels per centimeter, etc.
 top_header = 1 # the space reserved for header text above the grid of test cut-outs. Make this bigger if you have more lines of header.
 left_header = 0.75 # space reserved for text to the left of the grid of test cut-outs
-gap_between_cuts = 0.25 # space between each square test cut-outs and margins
 text_height = 0.125 # height of letters of large text
-line_spacing = 0.05 # space between lines of text
-ppu = 96 # pixels per unit. Used to make user coordinates in pixels. 96 Pixels per inch. 37.8 for pixels per centimeter, etc.
-
-score_color = "green" # pick a color with a hex value less than 0xFF0000 so it appears at the top of the Glowforge app and scores first.
 smaller_text_factor = 0.8 # scale down the second and third lines of the header by this factor
-cut_color = 0xFF0000 #the first test cut-out will be red and the rest will add more and more blue and be cut later.
+line_spacing = 0.05 # space between lines of text
+size_of_test_cut = 0.5 # how big of a square to cut out for each power/speed combo (in "units" )
+gap_between_cuts = 0.25 # space between each square test cut-outs and margins
+score_color = "green" # pick a color with a hex value less than 0xFF0000 so it appears at the top of the Glowforge app and so it scores the text before cutting.
+cut_color = 0xFF0000 #the first test cut-out will be this color (red) and the rest will have hex value incremented by a set amount so each square can use its own speed/power setting.
 
-# convert to user coordinates to (approximate) pixels
+# convert user coordinates to (approximate) pixels
 left_header *= ppu
 top_header *= ppu
 gap_between_cuts *= ppu
@@ -65,14 +66,12 @@ size_of_test_cut *= ppu
 def text_to_polylines(text, x_offset, y_offset, height=10):
     """
     Function to create a list of coordinates to draw the given text in a Hershey Font. These lists are used to make SVG polylines.
-
-    :param text: the text to create paths for
+    :param text: the text that will have paths generated
     :param x_offset: the x coordinate of the starting point in pixels
-    :param y_offset: ditto for y coordinate
-    :param height: the height of the  letters in pixels
-    :return: a list of lists with each sublist a list of coordinates that describe a path that draws a letter or part of a letter
+    :param y_offset: y coordinate of the middle of the text in pixels
+    :param height: the height of letters in pixels
+    :return: a list of lists. Each inner list contains coordinates that describe a path to draws a letter or part of a letter
     """     
-    
     thefont = HersheyFonts()
     thefont.load_default_font()
     scale_factor = float(height) / (thefont.render_options['bottom_line'] - thefont.render_options['cap_line'])
@@ -99,15 +98,15 @@ def text_to_polylines(text, x_offset, y_offset, height=10):
     return polylines
 
 def hex_color_code(n):
-    return f'#{n:06X}' #return a hexadecimal number in the format #000000 through #FFFFFF
+    return f'#{n:06X}' #return a string of a hexadecimal number in the format #000000 through #FFFFFF, the way SVG wants to see it
 
 
 for material in materials:
     svg_size = (left_header + len(material["powers"]) * (size_of_test_cut + gap_between_cuts),
-                top_header +  len(material["speeds"]) * (size_of_test_cut + gap_between_cuts) ) # (length, width) in pixels.
-    viewbox_x, viewbox_y = svg_size[0], svg_size[1] #viewbox coordinates as (approximate) pixels
+                top_header +  len(material["speeds"]) * (size_of_test_cut + gap_between_cuts) ) 
+    viewbox_x, viewbox_y = svg_size[0], svg_size[1] #viewbox coordinates in pixels
     dwg = svgwrite.drawing.Drawing(f'{material["filename"]}{filename_version_number}.svg', 
-        size=(f'{svg_size[0] / ppu }{units}', f'{svg_size[1] / ppu}{units}'), # size is in real-world units
+        size=(f'{svg_size[0] / ppu }{units}', f'{svg_size[1] / ppu}{units}'), # size is in real-world units so it shows up correctly-sized in the Glowforge app.
         viewBox=f"0 0 {viewbox_x} {viewbox_y}", 
         profile='full')
 

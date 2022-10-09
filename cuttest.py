@@ -7,36 +7,40 @@ import svgwrite
 
 materials = [
     {"filename" : "test_cut_acrylic_estreet",
-    "header" : ['Acrylic 1/8"', "estreet plastics", "thick: 0.115in"], # title plus two lines of text to print at the top. Make these short enough to fit. This program doesn't check length
+    "header" : ['Acrylic 1/8 Red', "estreet plastics", "thick: 0.115in"], # title plus two lines of text to print at the top. Make these short enough to fit. This program doesn't check length
     "powers" : [-1], # list the power settings to test separated by commas (-1 = Full power)
-    "speeds" : [130, 150, 170, 190],},  # list the speeds to test. This will make a square matrix with powers across the top and speeds going down.
+    "speeds" : [190, 210, 230, 250],},  # list the speeds to test. This will make a square matrix with powers across the top and speeds going down.
     {"filename" : "test_cut_acrylic_optyx",
     "header" : ['Acrylic 1/8"', "optyx", "thick: 0.105in"], 
     "powers" : [-1], 
-    "speeds" : [150, 170, 190, 200],},
+    "speeds" : [170, 175, 180, 185],},
     {"filename" : "test_cut_plywood_woodpecker",
-    "header" : ['Plywood 1/8"', "woodpecker", "thick: 0.125in"], 
+    "header" : ['Plywood 1/8"', "woodpecker birch", "thick: 0.125in"], 
     "powers" : [-1], 
-    "speeds" : [130, 150, 170, 190],},
-    {"filename" : "test_cut_mylar_aooin",
+    "speeds" : [200, 225, 250, 300],},
+    {"filename" : "test_cut_mylar_4mil",
     "header" : ['Mylar 4mil', "Aooin", "thick: 0.01 w/card stock"], 
     "powers" : [5, 15, 25], 
     "speeds" : [200, 225, 250, 275],}, 
+    {"filename" : "test_cut_mylar_6mil",
+    "header" : ['Mylar 6mil', "Amazon", "thick: 0.01 w/card stock"], 
+    "powers" : [5, 10, 15], 
+    "speeds" : [250, 270, 250, 275],}, 
     {"filename" : "test_cut_foam_core",
     "header" : ['Foam Core', "Amazon", "thickness 0.25"], 
     "powers" : [60, 80, 100], 
     "speeds" : [200, 250, 300, 350],}, 
     {"filename" : "test_cut_cardboard",
     "header" : ['Cardboard', "--", "thickness 0.125"], 
-    "powers" : [80, 100, -1], 
-    "speeds" : [200, 250, 300],}, 
+    "powers" : [80, 85, 90], 
+    "speeds" : [280, 300, 320],}, 
     {"filename" : "test_cut_felt",
     "header" : ['Felt', "VieFantaisie", "thickness 0.04"], 
-    "powers" : [30, 45, 60], 
-    "speeds" : [200, 250, 300],}, 
+    "powers" : [30, 20, 10], 
+    "speeds" : [300, 400, 500],}, 
 ]
 
-
+filename_version_number = "_v2"  #append this to the file name to distinguish versions. This can be blank "" if you don't need it.
 units="in"  # enter the values below using these units. Valid SVG units are in, cm, mm, pt, px
 size_of_test_cut = 0.5 # how big of a square to cut out for each power/speed combo (in "units" )
 top_header = 1 # the space reserved for header text above the grid of test cut-outs. Make this bigger if you have more lines of header.
@@ -102,7 +106,7 @@ for material in materials:
     svg_size = (left_header + len(material["powers"]) * (size_of_test_cut + gap_between_cuts),
                 top_header +  len(material["speeds"]) * (size_of_test_cut + gap_between_cuts) ) # (length, width) in pixels.
     viewbox_x, viewbox_y = svg_size[0], svg_size[1] #viewbox coordinates as (approximate) pixels
-    dwg = svgwrite.drawing.Drawing(f'{material["filename"]}.svg', 
+    dwg = svgwrite.drawing.Drawing(f'{material["filename"]}{filename_version_number}.svg', 
         size=(f'{svg_size[0] / ppu }{units}', f'{svg_size[1] / ppu}{units}'), # size is in real-world units
         viewBox=f"0 0 {viewbox_x} {viewbox_y}", 
         profile='full')
